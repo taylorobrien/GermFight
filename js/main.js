@@ -10,7 +10,9 @@ var locationy = "hospital";
 var timeleft = "300";
 var flowerpoint = 0;
 var gettingflowers = false;
-var money = 0;
+var money = 450;
+var holdingpotion = false;
+var potioninbag = "none";
 
 P2Game.Boot = function (game){
 
@@ -56,7 +58,8 @@ P2Game.Preload.prototype = {
 		this.load.tilemap('witchmap', 'assets/witchmap.json', null, Phaser.Tilemap.TILED_JSON);
 		this.load.image('witchtile', 'assets/witchtile.png'); 
 		this.load.tilemap('hospitalroom', 'assets/hospitalroom.json', null, Phaser.Tilemap.TILED_JSON);
-		this.load.image('hospitaltile', 'assets/hospitaltile.png'); 
+		this.load.image('hospitaltile', 'assets/hospitaltile.png');
+		this.load.image('hospitalguy', 'assets/guyhospital.png'); 
 		this.load.image('hospital','assets/hospital.png');
 		this.load.image('potion1','assets/potion1.png');
 		this.load.image('potion2','assets/potion2.png');
@@ -117,6 +120,11 @@ preload: function () {
 	this.game.physics.arcade.enable(this.blackbar);
 	this.blackbar.body.immovable = true;
 	
+	this.hospitalguy = this.game.add.sprite(350,40,'hospitalguy');
+	this.game.physics.arcade.enable(this.hospitalguy);
+	this.hospitalguy.body.immovable = true;
+	this.hospitalguy.scale.set(.7,.7);
+	
 	this.map = this.game.add.tilemap('hospitalroom');
 	this.map.addTilesetImage('hospitaltile');
     	this.layer =this. map.createLayer('Tile Layer 1');
@@ -147,15 +155,44 @@ preload: function () {
 	timeleft --;
 },
 
+    hitguy: function(){
+	if(potioninbag == "potion1"){
+		money = money - 50;
+		potioninbag = "none"
+	}
+	if(potioninbag == "potion2"){
+		timeleft = timeleft - 20;
+		potioninbag = "none"
+	}
+	if(potioninbag == "potion3"){
+		this.state.start('End1');
+		potioninbag = "none"
+	}
+	if(potioninbag == "potion4"){
+		money = money -20;
+		potioninbag = "none"
+	}
+	if(potioninbag == "potion5"){
+		timeleft = timeleft - 50;
+		potioninbag = "none"
+	}
+
+},
+
+
     update: function () {
 
 	this.game.physics.arcade.collide(this.player,this.layer);
+	this.game.physics.arcade.collide(this.player,this.hospitalguy,this.hitguy,null,this);
 	this.game.physics.arcade.collide(this.player,this.blackbar,this.gooutside,null,this);
 
 	this.player.body.velocity.x = 0;
     	this.player.body.velocity.y = 0;
 	
 
+	if(timeleft <=0){
+		this.state.start('End1');
+	}
 
 if (this.cursors.left.isDown)
     {
@@ -377,6 +414,9 @@ if(locationy == "witchshop"){
     this.player.body.velocity.x = 0;
     this.player.body.velocity.y = 0;
 
+	if(timeleft <=0){
+		this.state.start('End1');
+	}
 
 if (this.cursors.left.isDown)
     {
@@ -533,7 +573,7 @@ preload: function () {
 	this.flowerlady.body.velocity.x = 0;
 	this.flowerlady.body.velocity.y = 0;
 	gettingflowers = true;
-	if(flowerpoint >=150){
+	if(flowerpoint > 0){
 		money =  money + flowerpoint;
 		flowerpoint = 0;
 	}
@@ -561,6 +601,10 @@ preload: function () {
 		this.flowerlady.animations.play('idle');
 }
 
+
+	if(timeleft <=0){
+		this.state.start('End1');
+	}
 
 	this.game.physics.arcade.collide(this.player,this.layer);
 	this.game.physics.arcade.collide(this.player,this.blackbar,this.gooutside,null,this);
@@ -695,22 +739,22 @@ preload: function () {
 
 	this.potion2 = this.game.add.sprite(700,80,'potion2');
 	this.game.physics.arcade.enable(this.potion2);
-	this.potion2.body.immovable = true;
+	//this.potion2.body.immovable = true;
 	this.potion2.scale.set(.3,.3);
 
 	this.potion3 = this.game.add.sprite(1300,100,'potion3');
 	this.game.physics.arcade.enable(this.potion3);
-	this.potion3.body.immovable = true;
+	//this.potion3.body.immovable = true;
 	this.potion3.scale.set(.3,.3);
 
 	this.potion4 = this.game.add.sprite(500,400,'potion4');
 	this.game.physics.arcade.enable(this.potion4);
-	this.potion4.body.immovable = true;
+	//this.potion4.body.immovable = true;
 	this.potion4.scale.set(.3,.3);
 
 	this.potion5 = this.game.add.sprite(1000,200,'potion5');
 	this.game.physics.arcade.enable(this.potion5);
-	this.potion5.body.immovable = true;
+	//this.potion5.body.immovable = true;
 	this.potion5.scale.set(.3,.3);
 
 	this.witchlady = this.game.add.sprite(900,400, 'witchsprite');
@@ -757,13 +801,68 @@ preload: function () {
 	this.witchlady.body.velocity.y = 0;
 },
 
+   getpotion1: function(body1,body2){
+	if(holdingpotion == false && money >= 150){
+		body2.kill()
+		potioninbag = "potion1"
+		holdingpotion = true;
+		money = money - 150;
+	}
+},
+
+   getpotion2: function(body1,body2){
+	if(holdingpotion == false && money >= 150){
+		body2.kill()
+		potioninbag = "potion2"
+		holdingpotion = true;
+		money = money - 150;
+	}
+},
+
+   getpotion3: function(body1,body2){
+	if(holdingpotion == false && money >= 150){
+		body2.kill()
+		potioninbag = "potion3"
+		holdingpotion = true;
+		money = money - 150;
+	}
+},
+
+   getpotion4: function(body1,body2){
+	if(holdingpotion == false && money >= 150){
+		body2.kill()
+		potioninbag = "potion4"
+		holdingpotion = true;
+		money = money - 150;
+	}
+},
+
+   getpotion5: function(body1,body2){
+	if(holdingpotion == false && money >= 150){
+		body2.kill()
+		potioninbag = "potion5"
+		holdingpotion = true;
+		money = money - 150;
+	}
+},
+
+
+
 
     update: function () {
 
-	
+	if(timeleft <=0){
+		this.state.start('End1');
+	}	
+
 	this.game.physics.arcade.collide(this.witchlady,this.layer);
 	this.game.physics.arcade.collide(this.player,this.layer);
-	this.game.physics.arcade.collide(this.player,this.blackbar,this.gooutside,null,this);
+	this.game.physics.arcade.overlap(this.player,this.blackbar,this.gooutside,null,this);
+	this.game.physics.arcade.overlap(this.player,this.potion1,this.getpotion1,null,this);
+	this.game.physics.arcade.overlap(this.player,this.potion2,this.getpotion2,null,this);
+	this.game.physics.arcade.overlap(this.player,this.potion3,this.getpotion3,null,this);
+	this.game.physics.arcade.overlap(this.player,this.potion4,this.getpotion4,null,this);
+	this.game.physics.arcade.overlap(this.player,this.potion5,this.getpotion5,null,this);
 
 	this.player.body.velocity.x = 0;
     	this.player.body.velocity.y = 0;
@@ -864,8 +963,49 @@ else if (this.cursors.up.isDown)
 
 };
 
+P2Game.End1 = function (game) {
 
 
+    this.cursors;
+
+    this.result = 'Move with cursors. Hit an object to change State';
+
+};
+
+P2Game.End1.prototype = {
+
+    create: function () {
+
+
+	this.game.stage.backgroundColor = '#00FFFF';	
+
+	var style3 = {font: "30px Arial", fill:"#DC143C"};
+	if(timeleft > 0){
+		var scoringstuff = "Thanks for your help! You saved your friend!"}
+	else{
+		var scoringstuff = "Try Again. Refresh to Play!";
+	}
+ 	var winstatement = game.add.text(50,200,scoringstuff,style3);
+	
+
+    },
+
+
+    
+    update: function () {
+
+
+    },
+
+
+    render: function () {
+
+    }
+
+};
+
+
+game.state.add('End1', P2Game.End1);
 game.state.add('Boot', P2Game.Boot);
 game.state.add('InWitchShop', P2Game.InWitchShop);
 game.state.add('InHospital', P2Game.InHospital);
