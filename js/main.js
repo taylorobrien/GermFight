@@ -9,6 +9,8 @@ var mapscollected = 0;
 var locationy = "hospital";
 var timeleft = "300";
 var flowerpoint = 0;
+var gettingflowers = false;
+var money = 0;
 
 P2Game.Boot = function (game){
 
@@ -44,7 +46,9 @@ P2Game.Preload.prototype = {
 		var style3 = {font: "30px Arial", fill:"#DC143C"};
 		var scoringstuff = "Game is Loading....";
  		var winstatement = game.add.text(200,200,scoringstuff,style3);
-		game.load.spritesheet('player','assets/police-spritesheet.png',30,36.5,12);
+		this.game.load.spritesheet('flowersprite','assets/flowerspritesheet.png',32,48,12);
+		this.game.load.spritesheet('player','assets/police-spritesheet.png',30,36.5,12);
+		this.game.load.spritesheet('witchsprite','assets/witchspritesheet.png',62,62,12);
 		this.load.tilemap('level1', 'assets/outdoor.json', null, Phaser.Tilemap.TILED_JSON);
 		this.load.image('outdoortile', 'assets/outdoortile.png'); 
 		this.load.tilemap('flowermap', 'assets/flowermap.json', null, Phaser.Tilemap.TILED_JSON);
@@ -54,6 +58,11 @@ P2Game.Preload.prototype = {
 		this.load.tilemap('hospitalroom', 'assets/hospitalroom.json', null, Phaser.Tilemap.TILED_JSON);
 		this.load.image('hospitaltile', 'assets/hospitaltile.png'); 
 		this.load.image('hospital','assets/hospital.png');
+		this.load.image('potion1','assets/potion1.png');
+		this.load.image('potion2','assets/potion2.png');
+		this.load.image('potion3','assets/potion3.png');
+		this.load.image('potion4','assets/potion4.png');
+		this.load.image('potion5','assets/potion5.png');
 		this.load.image('flowerbackground','assets/flowerbackground.jpg');
 		this.load.image('tilebackground','assets/tilebackground.jpg');
 		this.load.image('witchbackground','assets/witchbackground.jpg');
@@ -214,10 +223,12 @@ else if (this.cursors.up.isDown)
 
     render: function () {
 
-       
-
+	if(gettingflowers == true){
+		this.game.debug.text("Flowers: " + flowerpoint, 50,480);
+	}       
+	this.game.debug.text("Money: " + money, 400,50);
        this.game.debug.text("Time Remaining: " + timeleft, 50, 50);
-	this.game.debug.text("Flowers: " + flowerpoint, 50,550);
+	
 
     }
 
@@ -249,6 +260,11 @@ P2Game.Outside.prototype = {
     	this.layer =this. map.createLayer('Tile Layer 1');
     	this.layer.resizeWorld();
  	this.map.setCollisionBetween(1, 12);
+
+	//if(flowerpoint == 0){
+		this.game.time.events.repeat(Phaser.Timer.SECOND * .0000001, 200, this.addflowers,this);
+
+	//}
 
 	this.blackbar = this.game.add.sprite(600,435,'blackbar'); //435
 	this.blackbar.scale.set(1,2);
@@ -307,7 +323,7 @@ if(locationy == "witchshop"){
         this.cursors = this.input.keyboard.createCursorKeys();
 	
 	this.game.time.events.repeat(Phaser.Timer.SECOND * 1, 3000, this.minustime,this);
-
+	
 	
 
     },
@@ -320,9 +336,7 @@ if(locationy == "witchshop"){
 
     minustime: function(){
 	timeleft --;
-	if(flowerpoint == 0){
-		this.addflowers();
-	}
+
 },
 
    enterflowershop: function(){
@@ -336,21 +350,24 @@ if(locationy == "witchshop"){
 },
 
    killflower: function(body1,body2){
+	if(gettingflowers == true){
 	body2.kill();
 	flowerpoint++;
+	}
 },
 
    addflowers: function(){
-	flowers2 = this.flower.create(game.world.randomX, game.world.randomY, 'redflower');
+	flowers2 = this.flowers.create(game.world.randomX, game.world.randomY, 'redflower');
 	game.physics.enable(flowers2, Phaser.Physics.ARCADE);
+	flowers2.scale.set(.05,.05);
 
 },
     
     update: function () {
 	this.game.physics.arcade.collide(this.player,this.layer);
-	this.game.physics.arcade.overlap(this.player,this.flower,this.killflower,null,this);
+	this.game.physics.arcade.overlap(this.player,this.flowers,this.killflower,null,this);
 	this.game.physics.arcade.collide(this.player,this.witch);
-	this.game.physics.arcade.collide(this.player,this.flower);
+	//this.game.physics.arcade.collide(this.player,this.flower);
 	this.game.physics.arcade.collide(this.hospital,this.player);
 	this.game.physics.arcade.overlap(this.blackbar,this.player,this.enterhospital,null,this);
 	this.game.physics.arcade.overlap(this.blackbar2,this.player,this.enterflowershop,null,this);
@@ -428,7 +445,10 @@ else if (this.cursors.up.isDown)
     render: function () {
 	
 	this.game.debug.text("Time Remaining: " + timeleft, 50, 50);
-this.game.debug.text("Flowers: " + flowerpoint, 50,550);
+	if(gettingflowers == true){
+		this.game.debug.text("Flowers: " + flowerpoint, 50,480);
+	}       
+	this.game.debug.text("Money: " + money, 400,50);
 
 
     }
@@ -470,6 +490,15 @@ preload: function () {
     	this.layer.resizeWorld();
  	this.map.setCollisionBetween(1, 12);
 
+	this.flowerlady = this.game.add.sprite(500,350,'flowersprite');
+	this.game.physics.arcade.enable(this.flowerlady);
+	this.flowerlady.body.collideWorldBounds = true;
+	this.flowerlady.animations.add('left', [3,4,5], 3, true);
+    	this.flowerlady.animations.add('right', [6,7,8], 3, true);
+    	this.flowerlady.animations.add('idle', [0,1,2], 3, true);
+    	this.flowerlady.animations.add('up', [9,10,11], 3, true);
+
+
 	this.player = this.game.add.sprite(920,540,'player');
 	this.game.physics.arcade.enable(this.player);
 	this.player.animations.add('left', [3,4,5], 3, true);
@@ -482,6 +511,7 @@ preload: function () {
         this.cursors = this.input.keyboard.createCursorKeys();
 
 	this.game.time.events.repeat(Phaser.Timer.SECOND * 1, 3000, this.minustime,this);
+	this.game.time.events.repeat(Phaser.Timer.SECOND * 3, 3000, this.flowerladymove,this);
     },
 
 
@@ -494,7 +524,43 @@ preload: function () {
 	timeleft --;
 },
 
+   flowerladymove: function(){
+	this.flowerlady.body.velocity.x = Math.random()*(101)+100*-1^(Math.random());
+	this.flowerlady.body.velocity.y = Math.random()*(101)+100*-1^(Math.random());
+},
+
+   stopmoving: function(){
+	this.flowerlady.body.velocity.x = 0;
+	this.flowerlady.body.velocity.y = 0;
+	gettingflowers = true;
+	if(flowerpoint >=150){
+		money =  money + flowerpoint;
+		flowerpoint = 0;
+	}
+},
+
+ 
+   
+   
     update: function () {
+	
+	this.game.physics.arcade.overlap(this.player,this.flowerlady,this.stopmoving,null,this);
+
+	this.game.physics.arcade.collide(this.flowerlady,this.layer);
+
+	if(this.flowerlady.body.velocity.x > 0 && this.flowerlady.body.velocity.x > this.flowerlady.body.velocity.y){
+		this.flowerlady.animations.play('right');
+}
+	else if (this.flowerlady.body.velocity.x < 0 && this.flowerlady.body.velocity.x < this.flowerlady.body.velocity.y){
+		this.flowerlady.animations.play('left');
+}
+	else if(this.flowerlady.body.velocity.y > 0 && this.flowerlady.body.velocity.y > this.flowerlady.body.velocity.x){
+		this.flowerlady.animations.play('up');
+}
+	else{
+		this.flowerlady.animations.play('idle');
+}
+
 
 	this.game.physics.arcade.collide(this.player,this.layer);
 	this.game.physics.arcade.collide(this.player,this.blackbar,this.gooutside,null,this);
@@ -573,7 +639,10 @@ else if (this.cursors.up.isDown)
        
 
        this.game.debug.text("Time Remaining: " + timeleft, 50, 50);
-this.game.debug.text("Flowers: " + flowerpoint, 50,550);
+	if(gettingflowers == true){
+		this.game.debug.text("Flowers: " + flowerpoint, 50,480);
+	}       
+	this.game.debug.text("Money: " + money, 400,50);
 
 
 
@@ -590,6 +659,7 @@ P2Game.InWitchShop = function (game) {
 	this.player;
 	this.bg;
 	this.layer;
+	this.stop = false;
 
 },
 
@@ -618,6 +688,38 @@ preload: function () {
     	this.layer.resizeWorld();
  	this.map.setCollisionBetween(1, 12);
 
+	this.potion1 = this.game.add.sprite(1500,400,'potion1');
+	this.game.physics.arcade.enable(this.potion1);
+	this.potion1.body.immovable = true;
+	this.potion1.scale.set(.3,.3);
+
+	this.potion2 = this.game.add.sprite(700,80,'potion2');
+	this.game.physics.arcade.enable(this.potion2);
+	this.potion2.body.immovable = true;
+	this.potion2.scale.set(.3,.3);
+
+	this.potion3 = this.game.add.sprite(1300,100,'potion3');
+	this.game.physics.arcade.enable(this.potion3);
+	this.potion3.body.immovable = true;
+	this.potion3.scale.set(.3,.3);
+
+	this.potion4 = this.game.add.sprite(500,400,'potion4');
+	this.game.physics.arcade.enable(this.potion4);
+	this.potion4.body.immovable = true;
+	this.potion4.scale.set(.3,.3);
+
+	this.potion5 = this.game.add.sprite(1000,200,'potion5');
+	this.game.physics.arcade.enable(this.potion5);
+	this.potion5.body.immovable = true;
+	this.potion5.scale.set(.3,.3);
+
+	this.witchlady = this.game.add.sprite(900,400, 'witchsprite');
+	this.game.physics.arcade.enable(this.witchlady);
+	this.witchlady.animations.add('left', [3,4,5], 3, true);
+    	this.witchlady.animations.add('right', [6,7,8], 3, true);
+    	this.witchlady.animations.add('idle', [0,1,2], 3, true);
+    	this.witchlady.animations.add('up', [9,10,11], 3, true);
+
 	this.player = this.game.add.sprite(920,540,'player');
 	this.game.physics.arcade.enable(this.player);
 	this.player.animations.add('left', [3,4,5], 3, true);
@@ -630,9 +732,17 @@ preload: function () {
         this.cursors = this.input.keyboard.createCursorKeys();
 
 	this.game.time.events.repeat(Phaser.Timer.SECOND * 1, 3000, this.minustime,this);
+	this.game.time.events.repeat(Phaser.Timer.SECOND * 3, 3000, this.witchladymove,this);
 
-    },
 
+	
+    
+},
+
+   witchladymove: function(){
+	this.witchlady.body.velocity.x = Math.random()*(101)+100*-1^(Math.random());
+	this.witchlady.body.velocity.y = Math.random()*(101)+100*-1^(Math.random());
+},
 
     minustime: function(){
 	timeleft --;
@@ -642,15 +752,37 @@ preload: function () {
 	this.state.start('Outside');
 },
 
+   pausemovement: function(){
+	this.witchlady.body.velocity.x = 0;
+	this.witchlady.body.velocity.y = 0;
+},
+
 
     update: function () {
 
+	
+	this.game.physics.arcade.collide(this.witchlady,this.layer);
 	this.game.physics.arcade.collide(this.player,this.layer);
 	this.game.physics.arcade.collide(this.player,this.blackbar,this.gooutside,null,this);
 
 	this.player.body.velocity.x = 0;
     	this.player.body.velocity.y = 0;
+
+	this.game.physics.arcade.overlap(this.player,this.witchlady,this.pausemovement,null,this);
 	
+
+if(this.witchlady.body.velocity.x > 0 && this.witchlady.body.velocity.x > this.witchlady.body.velocity.y){
+		this.witchlady.animations.play('right');
+}
+	else if (this.witchlady.body.velocity.x < 0 && this.witchlady.body.velocity.x < this.witchlady.body.velocity.y){
+		this.witchlady.animations.play('left');
+}
+	else if(this.witchlady.body.velocity.y > 0 && this.witchlady.body.velocity.y > this.witchlady.body.velocity.x){
+		this.witchlady.animations.play('up');
+}
+	else{
+		this.witchlady.animations.play('idle');
+}
 
 
 if (this.cursors.left.isDown)
@@ -722,8 +854,10 @@ else if (this.cursors.up.isDown)
        
 
        this.game.debug.text("Time Remaining: " + timeleft, 50, 50);
-this.game.debug.text("Flowers: " + flowerpoint, 50,550);
-
+	if(gettingflowers == true){
+		this.game.debug.text("Flowers: " + flowerpoint, 50,480);
+	}       
+	this.game.debug.text("Money: " + money, 400,50);
 
 
     }
@@ -749,4 +883,5 @@ game.state.start('Boot');
 //http://3.imimg.com/data3/QP/HB/IMFCP-3130063/sites-default-files-images-sandy-20brown_0-thumbnail-250x250.jpg
 //http://enisma.com/dark-wood-floor-pattern-ideas-amazing-7-design-awesome.html
 //https://farm8.staticflickr.com/7033/6690036699_abfc7aece3_n.jpg
+//http://s818.photobucket.com/user/qtpi0121/media/-RTP%20Edits-/Witch.png.html
 
