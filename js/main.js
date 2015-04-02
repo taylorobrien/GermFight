@@ -13,6 +13,8 @@ var gettingflowers = false;
 var money = 450;
 var holdingpotion = false;
 var potioninbag = "none";
+var music;
+var grunt;
 
 P2Game.Boot = function (game){
 
@@ -61,6 +63,7 @@ P2Game.Preload.prototype = {
 		this.load.image('hospitaltile', 'assets/hospitaltile.png');
 		this.load.image('hospitalguy', 'assets/guyhospital.png'); 
 		this.load.image('hospital','assets/hospital.png');
+		this.load.image('flowerpot','assets/flowerpot.png');
 		this.load.image('potion1','assets/potion1.png');
 		this.load.image('potion2','assets/potion2.png');
 		this.load.image('potion3','assets/potion3.png');
@@ -75,7 +78,11 @@ P2Game.Preload.prototype = {
 		this.load.image('hospital','assets/hospital.png');
 		this.load.image('flower','assets/flowershop.png');
 		//var preloaderbar = this.add.sprite(150,300, 'preloaderbar');
-		//this.load.audio('cellphonecall',['assets/cellphonecall.mp3','assets/cellphonecall.ogg']); 
+		this.load.audio('hellopotion',['assets/hellopotion.mp3','assets/hellopotion.ogg']);
+		this.load.audio('flowercollecting',['assets/flowercollecting.mp3','assets/flowercollecting.ogg']);
+		this.load.audio('hurrypotion',['assets/hurrypotion.mp3','assets/hurrypotion.ogg']);
+		this.load.audio('ThemeSong',['assets/ThemeSong.mp3','assets/grunt.ogg']);
+		this.load.audio('grunt',['assets/grunt.mp3','assets/ThemeSong.ogg']); 
 		this.load.image('background','assets/background.jpg');
 		
 
@@ -109,6 +116,13 @@ preload: function () {
     },
 
     create: function () {
+
+	music = game.add.audio('ThemeSong');
+	music.play();	
+
+	hurrypotion = game.add.audio('hurrypotion');
+	
+	grunt = game.add.audio('Grunt');
 
 	locationy = "hospital";
         //this.game.stage.backgroundColor = '#806000';
@@ -159,22 +173,30 @@ preload: function () {
 	if(potioninbag == "potion1"){
 		money = money - 50;
 		potioninbag = "none"
+		grunt.play();
 	}
-	if(potioninbag == "potion2"){
+	else if(potioninbag == "potion2"){
 		timeleft = timeleft - 20;
 		potioninbag = "none"
+		grunt.play();
 	}
-	if(potioninbag == "potion3"){
+	else if(potioninbag == "potion3"){
 		this.state.start('End1');
 		potioninbag = "none"
+
 	}
-	if(potioninbag == "potion4"){
+	else if(potioninbag == "potion4"){
 		money = money -20;
 		potioninbag = "none"
+		grunt.play();
 	}
-	if(potioninbag == "potion5"){
+	else if(potioninbag == "potion5"){
 		timeleft = timeleft - 50;
 		potioninbag = "none"
+		grunt.play();
+	}
+	else{
+		hurrypotion.play();	
 	}
 
 },
@@ -404,7 +426,7 @@ if(locationy == "witchshop"){
 	this.game.physics.arcade.collide(this.player,this.layer);
 	this.game.physics.arcade.overlap(this.player,this.flowers,this.killflower,null,this);
 	this.game.physics.arcade.collide(this.player,this.witch);
-	//this.game.physics.arcade.collide(this.player,this.flower);
+	this.game.physics.arcade.collide(this.player,this.flower);
 	this.game.physics.arcade.collide(this.hospital,this.player);
 	this.game.physics.arcade.overlap(this.blackbar,this.player,this.enterhospital,null,this);
 	this.game.physics.arcade.overlap(this.blackbar2,this.player,this.enterflowershop,null,this);
@@ -515,6 +537,9 @@ preload: function () {
     create: function () {
 	locationy = "flowershop";
 
+	music2 = game.add.audio('flowercollecting');
+	music2.play();
+
         //this.game.stage.backgroundColor = '#806000';
 	this.bg = game.add.tileSprite(0, 0, 2000, 600, 'flowerbackground');
 	//this.bg.scale.set(2,2);
@@ -529,6 +554,26 @@ preload: function () {
     	this.layer =this. map.createLayer('Tile Layer 1');
     	this.layer.resizeWorld();
  	this.map.setCollisionBetween(1, 12);
+
+	this.flowerpot1 = this.game.add.sprite(300,100,'flowerpot');
+	this.game.physics.arcade.enable(this.flowerpot1);
+	this.flowerpot1.scale.set(.05,.05);
+
+	this.flowerpot2 = this.game.add.sprite(500,500,'flowerpot');
+	this.game.physics.arcade.enable(this.flowerpot1);
+	this.flowerpot2.scale.set(.05,.05);
+
+	this.flowerpot3 = this.game.add.sprite(800,400,'flowerpot');
+	this.game.physics.arcade.enable(this.flowerpot1);
+	this.flowerpot3.scale.set(.05,.05);
+	
+	this.flowerpot4 = this.game.add.sprite(1100,200,'flowerpot');
+	this.game.physics.arcade.enable(this.flowerpot1);
+	this.flowerpot4.scale.set(.05,.05);
+	
+	this.flowerpot5 = this.game.add.sprite(1300,500,'flowerpot');
+	this.game.physics.arcade.enable(this.flowerpot1);
+	this.flowerpot5.scale.set(.05,.05);
 
 	this.flowerlady = this.game.add.sprite(500,350,'flowersprite');
 	this.game.physics.arcade.enable(this.flowerlady);
@@ -716,6 +761,9 @@ preload: function () {
 
     create: function () {
 	locationy = "witchshop";
+
+	music3 = game.add.audio('hellopotion');
+	music3.play();
 
         //this.game.stage.backgroundColor = '#806000';
 	this.bg = game.add.tileSprite(0, 0, 2000, 600, 'witchbackground');
@@ -1023,5 +1071,6 @@ game.state.start('Boot');
 //http://3.imimg.com/data3/QP/HB/IMFCP-3130063/sites-default-files-images-sandy-20brown_0-thumbnail-250x250.jpg
 //http://enisma.com/dark-wood-floor-pattern-ideas-amazing-7-design-awesome.html
 //https://farm8.staticflickr.com/7033/6690036699_abfc7aece3_n.jpg
+//http://www.newgrounds.com/audio/listen/616031
 //http://s818.photobucket.com/user/qtpi0121/media/-RTP%20Edits-/Witch.png.html
 
