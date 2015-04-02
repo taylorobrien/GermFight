@@ -10,7 +10,7 @@ var locationy = "hospital";
 var timeleft = "300";
 var flowerpoint = 0;
 var gettingflowers = false;
-var money = 450;
+var money = 0;
 var holdingpotion = false;
 var potioninbag = "none";
 var music;
@@ -81,8 +81,8 @@ P2Game.Preload.prototype = {
 		this.load.audio('hellopotion',['assets/hellopotion.mp3','assets/hellopotion.ogg']);
 		this.load.audio('flowercollecting',['assets/flowercollecting.mp3','assets/flowercollecting.ogg']);
 		this.load.audio('hurrypotion',['assets/hurrypotion.mp3','assets/hurrypotion.ogg']);
-		this.load.audio('ThemeSong',['assets/ThemeSong.mp3','assets/grunt.ogg']);
-		this.load.audio('grunt',['assets/grunt.mp3','assets/ThemeSong.ogg']); 
+		this.load.audio('ThemeSong',['assets/ThemeSong.mp3','assets/ThemeSong.ogg']);
+		this.load.audio('grunt',['assets/grunt.mp3','assets/grunt.ogg']); 
 		this.load.image('background','assets/background.jpg');
 		
 
@@ -122,7 +122,7 @@ preload: function () {
 
 	hurrypotion = game.add.audio('hurrypotion');
 	
-	grunt = game.add.audio('Grunt');
+	grunt = game.add.audio('grunt');
 
 	locationy = "hospital";
         //this.game.stage.backgroundColor = '#806000';
@@ -173,26 +173,31 @@ preload: function () {
 	if(potioninbag == "potion1"){
 		money = money - 50;
 		potioninbag = "none"
+		holdingpotion = false
 		grunt.play();
 	}
 	else if(potioninbag == "potion2"){
 		timeleft = timeleft - 20;
 		potioninbag = "none"
+		holdingpotion = false
 		grunt.play();
 	}
 	else if(potioninbag == "potion3"){
 		this.state.start('End1');
+		holdingpotion = false
 		potioninbag = "none"
 
 	}
 	else if(potioninbag == "potion4"){
 		money = money -20;
 		potioninbag = "none"
+		holdingpotion = false
 		grunt.play();
 	}
 	else if(potioninbag == "potion5"){
 		timeleft = timeleft - 50;
 		potioninbag = "none"
+		holdingpotion = false
 		grunt.play();
 	}
 	else{
@@ -557,23 +562,23 @@ preload: function () {
 
 	this.flowerpot1 = this.game.add.sprite(300,100,'flowerpot');
 	this.game.physics.arcade.enable(this.flowerpot1);
-	this.flowerpot1.scale.set(.05,.05);
+	this.flowerpot1.scale.set(.04,.04);
 
 	this.flowerpot2 = this.game.add.sprite(500,500,'flowerpot');
 	this.game.physics.arcade.enable(this.flowerpot1);
-	this.flowerpot2.scale.set(.05,.05);
+	this.flowerpot2.scale.set(.04,.04);
 
 	this.flowerpot3 = this.game.add.sprite(800,400,'flowerpot');
 	this.game.physics.arcade.enable(this.flowerpot1);
-	this.flowerpot3.scale.set(.05,.05);
+	this.flowerpot3.scale.set(.04,.04);
 	
 	this.flowerpot4 = this.game.add.sprite(1100,200,'flowerpot');
 	this.game.physics.arcade.enable(this.flowerpot1);
-	this.flowerpot4.scale.set(.05,.05);
+	this.flowerpot4.scale.set(.04,.04);
 	
 	this.flowerpot5 = this.game.add.sprite(1300,500,'flowerpot');
 	this.game.physics.arcade.enable(this.flowerpot1);
-	this.flowerpot5.scale.set(.05,.05);
+	this.flowerpot5.scale.set(.04,.04);
 
 	this.flowerlady = this.game.add.sprite(500,350,'flowersprite');
 	this.game.physics.arcade.enable(this.flowerlady);
@@ -619,7 +624,7 @@ preload: function () {
 	this.flowerlady.body.velocity.y = 0;
 	gettingflowers = true;
 	if(flowerpoint > 0){
-		money =  money + flowerpoint;
+		money =  money + flowerpoint*2;
 		flowerpoint = 0;
 	}
 },
@@ -1034,6 +1039,7 @@ P2Game.End1.prototype = {
 		var scoringstuff = "Try Again. Refresh to Play!";
 	}
  	var winstatement = game.add.text(50,200,scoringstuff,style3);
+	music.pause();
 	
 
     },
