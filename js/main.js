@@ -15,6 +15,7 @@ var holdingpotion = false;
 var potioninbag = "none";
 var music;
 var grunt;
+var playonce = 1;
 
 P2Game.Boot = function (game){
 
@@ -200,8 +201,9 @@ preload: function () {
 		holdingpotion = false
 		grunt.play();
 	}
-	else{
+	if(playonce = 1){
 		hurrypotion.play();	
+		playonce++;
 	}
 
 },
@@ -540,6 +542,7 @@ preload: function () {
     },
 
     create: function () {
+	gettingflowers = true;
 	locationy = "flowershop";
 
 	music2 = game.add.audio('flowercollecting');
@@ -622,7 +625,7 @@ preload: function () {
    stopmoving: function(){
 	this.flowerlady.body.velocity.x = 0;
 	this.flowerlady.body.velocity.y = 0;
-	gettingflowers = true;
+
 	if(flowerpoint > 0){
 		money =  money + flowerpoint*2;
 		flowerpoint = 0;
