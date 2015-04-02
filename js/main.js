@@ -8,6 +8,7 @@ var health = 150;
 var mapscollected = 0;
 var locationy = "hospital";
 var timeleft = "300";
+var flowerpoint = 0;
 
 P2Game.Boot = function (game){
 
@@ -56,7 +57,8 @@ P2Game.Preload.prototype = {
 		this.load.image('flowerbackground','assets/flowerbackground.jpg');
 		this.load.image('tilebackground','assets/tilebackground.jpg');
 		this.load.image('witchbackground','assets/witchbackground.jpg');
-		this.load.image('witch', 'assets/witch.png'); 
+		this.load.image('witch', 'assets/witch.png');
+		this.load.image('redflower', 'assets/flower-red.png'); 
 		this.load.image('blackbar','assets/blackbar.png');
 		this.load.image('hospital','assets/hospital.png');
 		this.load.image('flower','assets/flowershop.png');
@@ -215,6 +217,7 @@ else if (this.cursors.up.isDown)
        
 
        this.game.debug.text("Time Remaining: " + timeleft, 50, 50);
+	this.game.debug.text("Flowers: " + flowerpoint, 50,550);
 
     }
 
@@ -275,6 +278,12 @@ P2Game.Outside.prototype = {
 	this.witch.scale.set(.8,.8);
 	this.witch.body.immovable = true;
 	
+	this.flowers = game.add.group();
+	this.flowers.enableBody = true;
+
+	//this.redflower1 = this.game.add.sprite(10,200,'redflower);
+	//this.game.physics.arcade.enable(this.redflower1);
+
 
 if(locationy == "hospital"){
 	this.player = this.game.add.sprite(600,480,'player');
@@ -299,6 +308,8 @@ if(locationy == "witchshop"){
 	
 	this.game.time.events.repeat(Phaser.Timer.SECOND * 1, 3000, this.minustime,this);
 
+	
+
     },
 
    enterhospital: function(){
@@ -306,8 +317,12 @@ if(locationy == "witchshop"){
 	
 },
 
+
     minustime: function(){
 	timeleft --;
+	if(flowerpoint == 0){
+		this.addflowers();
+	}
 },
 
    enterflowershop: function(){
@@ -319,9 +334,21 @@ if(locationy == "witchshop"){
 	this.state.start('InWitchShop');
 	
 },
+
+   killflower: function(body1,body2){
+	body2.kill();
+	flowerpoint++;
+},
+
+   addflowers: function(){
+	flowers2 = this.flower.create(game.world.randomX, game.world.randomY, 'redflower');
+	game.physics.enable(flowers2, Phaser.Physics.ARCADE);
+
+},
     
     update: function () {
 	this.game.physics.arcade.collide(this.player,this.layer);
+	this.game.physics.arcade.overlap(this.player,this.flower,this.killflower,null,this);
 	this.game.physics.arcade.collide(this.player,this.witch);
 	this.game.physics.arcade.collide(this.player,this.flower);
 	this.game.physics.arcade.collide(this.hospital,this.player);
@@ -401,6 +428,8 @@ else if (this.cursors.up.isDown)
     render: function () {
 	
 	this.game.debug.text("Time Remaining: " + timeleft, 50, 50);
+this.game.debug.text("Flowers: " + flowerpoint, 50,550);
+
 
     }
 
@@ -544,6 +573,8 @@ else if (this.cursors.up.isDown)
        
 
        this.game.debug.text("Time Remaining: " + timeleft, 50, 50);
+this.game.debug.text("Flowers: " + flowerpoint, 50,550);
+
 
 
     }
@@ -691,6 +722,8 @@ else if (this.cursors.up.isDown)
        
 
        this.game.debug.text("Time Remaining: " + timeleft, 50, 50);
+this.game.debug.text("Flowers: " + flowerpoint, 50,550);
+
 
 
     }
